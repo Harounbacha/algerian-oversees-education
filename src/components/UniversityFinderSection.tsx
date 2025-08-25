@@ -2,47 +2,150 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Search, MapPin, Star, Users, DollarSign, Clock } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { supabase } from "../supabaseClient";
 
-export function UniversityFinderSection() {
-  const universities = [
+type UniversityFinderSectionProps = {
+  onNavigateToPage?: (page: string) => void;
+};
+
+export function UniversityFinderSection({ onNavigateToPage }: UniversityFinderSectionProps) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedField, setSelectedField] = useState('');
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [universities, setUniversities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Sample universities data (in real app, this would come from Supabase)
+  const sampleUniversities = [
     {
+      id: 1,
       name: "University of Toronto",
       location: "Toronto, Canada",
+      country: "Canada",
       image: "https://images.unsplash.com/photo-1600239401291-385542139183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjB1bml2ZXJzaXR5JTIwYnVpbGRpbmdzJTIwYXJjaGl0ZWN0dXJlfGVufDF8fHx8MTc1NTc3NzkzMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       rating: 4.8,
       programs: ["Engineering", "Medicine", "Business"],
       tuition: "$45,000/year",
       deadline: "Jan 15, 2024",
       algerianStudents: 120,
-      scholarships: true
+      scholarships: true,
+      lowTuition: false,
+      openApplications: true
     },
     {
+      id: 2,
       name: "Sorbonne University",
       location: "Paris, France",
+      country: "France",
       image: "https://images.unsplash.com/photo-1600239401291-385542139183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjB1bml2ZXJzaXR5JTIwYnVpbGRpbmdzJTIwYXJjaGl0ZWN0dXJlfGVufDF8fHx8MTc1NTc3NzkzMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       rating: 4.7,
       programs: ["Literature", "Philosophy", "Sciences"],
       tuition: "€2,770/year",
       deadline: "Mar 1, 2024",
       algerianStudents: 85,
-      scholarships: true
+      scholarships: true,
+      lowTuition: true,
+      openApplications: true
     },
     {
+      id: 3,
       name: "Technical University of Munich",
       location: "Munich, Germany",
+      country: "Germany",
       image: "https://images.unsplash.com/photo-1600239401291-385542139183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjB1bml2ZXJzaXR5JTIwYnVpbGRpbmdzJTIwYXJjaGl0ZWN0dXJlfGVufDF8fHx8MTc1NTc3NzkzMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       rating: 4.9,
       programs: ["Engineering", "Computer Science", "Physics"],
       tuition: "Free (EU residents)",
       deadline: "Feb 28, 2024",
       algerianStudents: 65,
-      scholarships: true
+      scholarships: true,
+      lowTuition: true,
+      openApplications: true
     }
   ];
+
+  useEffect(() => {
+    // In a real app, fetch universities from Supabase
+    setUniversities(sampleUniversities);
+    setLoading(false);
+  }, []);
+
+  const toggleFilter = (filter: string) => {
+    setActiveFilters(prev => 
+      prev.includes(filter) 
+        ? prev.filter(f => f !== filter)
+        : [...prev, filter]
+    );
+  };
+
+  const handleViewDetails = (universityId: number) => {
+    if (onNavigateToPage) {
+      onNavigateToPage('university-detail');
+      // In a real app, you'd pass the university ID as a parameter
+      localStorage.setItem('selectedUniversityId', universityId.toString());
+    }
+  };
+
+  const handleViewAllUniversities = () => {
+    if (onNavigateToPage) {
+      onNavigateToPage('universities-list');
+    }
+  };
+
+  const filteredUniversities = universities.filter(university => {
+    // Search filter
+    const matchesSearch = searchTerm === '' || 
+      university.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      university.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      university.programs.some((program: string) => 
+        program.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+    // Country filter
+    const matchesCountry = selectedCountry === '' || selectedCountry === 'all' || university.country === selectedCountry;
+
+    // Field filter
+    const matchesField = selectedField === '' || selectedField === 'all' || 
+      university.programs.some((program: string) => 
+        program.toLowerCase().includes(selectedField.toLowerCase())
+      );
+
+    // Active filters
+    const matchesFilters = activeFilters.every(filter => {
+      switch (filter) {
+        case 'scholarships':
+          return university.scholarships;
+        case 'algerian-enrollment':
+          return university.algerianStudents > 50;
+        case 'low-tuition':
+          return university.lowTuition;
+        case 'open-applications':
+          return university.openApplications;
+        default:
+          return true;
+      }
+    });
+
+    return matchesSearch && matchesCountry && matchesField && matchesFilters;
+  });
+
+  if (loading) {
+    return (
+      <section id="universities" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading universities...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="universities" className="py-20 bg-white">
@@ -66,26 +169,30 @@ export function UniversityFinderSection() {
                 <Input
                   placeholder="Search universities, programs, or locations..."
                   className="pl-10 bg-white"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
-            <Select>
+            <Select value={selectedCountry} onValueChange={setSelectedCountry}>
               <SelectTrigger className="bg-white">
                 <SelectValue placeholder="Country" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="canada">Canada</SelectItem>
-                <SelectItem value="france">France</SelectItem>
-                <SelectItem value="germany">Germany</SelectItem>
-                <SelectItem value="uk">United Kingdom</SelectItem>
-                <SelectItem value="usa">United States</SelectItem>
+                <SelectItem value="all">All Countries</SelectItem>
+                <SelectItem value="Canada">Canada</SelectItem>
+                <SelectItem value="France">France</SelectItem>
+                <SelectItem value="Germany">Germany</SelectItem>
+                <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                <SelectItem value="United States">United States</SelectItem>
               </SelectContent>
             </Select>
-            <Select>
+            <Select value={selectedField} onValueChange={setSelectedField}>
               <SelectTrigger className="bg-white">
                 <SelectValue placeholder="Field of Study" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All Fields</SelectItem>
                 <SelectItem value="engineering">Engineering</SelectItem>
                 <SelectItem value="medicine">Medicine</SelectItem>
                 <SelectItem value="business">Business</SelectItem>
@@ -96,25 +203,52 @@ export function UniversityFinderSection() {
           </div>
           
           <div className="flex flex-wrap gap-4 mt-4">
-            <Button variant="outline" size="sm" className="text-sm">
+            <Button 
+              variant={activeFilters.includes('scholarships') ? "default" : "outline"} 
+              size="sm" 
+              className="text-sm"
+              onClick={() => toggleFilter('scholarships')}
+            >
               🎓 Scholarships Available
             </Button>
-            <Button variant="outline" size="sm" className="text-sm">
+            <Button 
+              variant={activeFilters.includes('algerian-enrollment') ? "default" : "outline"} 
+              size="sm" 
+              className="text-sm"
+              onClick={() => toggleFilter('algerian-enrollment')}
+            >
               🇩🇿 High Algerian Enrollment
             </Button>
-            <Button variant="outline" size="sm" className="text-sm">
+            <Button 
+              variant={activeFilters.includes('low-tuition') ? "default" : "outline"} 
+              size="sm" 
+              className="text-sm"
+              onClick={() => toggleFilter('low-tuition')}
+            >
               💰 Low Tuition
             </Button>
-            <Button variant="outline" size="sm" className="text-sm">
+            <Button 
+              variant={activeFilters.includes('open-applications') ? "default" : "outline"} 
+              size="sm" 
+              className="text-sm"
+              onClick={() => toggleFilter('open-applications')}
+            >
               📅 Open Applications
             </Button>
           </div>
         </div>
 
+        {/* Results Count */}
+        <div className="mb-8">
+          <p className="text-gray-600">
+            Showing {filteredUniversities.length} of {universities.length} universities
+          </p>
+        </div>
+
         {/* Universities Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {universities.map((university, index) => (
-            <Card key={index} className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
+          {filteredUniversities.map((university, index) => (
+            <Card key={university.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
               <div className="relative h-48 overflow-hidden">
                 <ImageWithFallback
                   src={university.image}
@@ -144,7 +278,7 @@ export function UniversityFinderSection() {
               
               <CardContent className="space-y-4">
                 <div className="flex flex-wrap gap-1">
-                  {university.programs.map((program, idx) => (
+                  {university.programs.map((program: string, idx: number) => (
                     <Badge key={idx} variant="secondary" className="text-xs">
                       {program}
                     </Badge>
@@ -177,7 +311,10 @@ export function UniversityFinderSection() {
                   </div>
                 </div>
                 
-                <Button className="w-full bg-primary hover:bg-primary/90">
+                <Button 
+                  className="w-full bg-primary hover:bg-primary/90"
+                  onClick={() => handleViewDetails(university.id)}
+                >
                   View Details
                 </Button>
               </CardContent>
@@ -185,9 +322,34 @@ export function UniversityFinderSection() {
           ))}
         </div>
 
+        {/* No Results */}
+        {filteredUniversities.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-6xl mb-4">🔍</div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No universities found</h3>
+            <p className="text-gray-600 mb-6">Try adjusting your search criteria or filters</p>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedCountry('');
+                setSelectedField('');
+                setActiveFilters([]);
+              }}
+            >
+              Clear All Filters
+            </Button>
+          </div>
+        )}
+
         {/* View More */}
         <div className="text-center mt-12">
-          <Button variant="outline" size="lg" className="border-primary text-primary hover:bg-primary hover:text-white">
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="border-primary text-primary hover:bg-primary hover:text-white"
+            onClick={handleViewAllUniversities}
+          >
             View All 500+ Universities
           </Button>
         </div>

@@ -1,5 +1,6 @@
 import { Button } from "./ui/button";
 import { ArrowRight, Search, Users, Award } from "lucide-react";
+import { motion } from "framer-motion";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import React from "react";
 
@@ -9,16 +10,22 @@ type HeroSectionProps = {
 
 export function HeroSection({ onNavigateToPage }: HeroSectionProps) {
   return (
-    <section className="relative bg-gradient-to-br from-primary via-primary to-teal-600 text-white overflow-hidden">
+    <section className="relative bg-gradient-to-br from-primary via-primary to-teal-600 text-primary-foreground overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent"></div>
       
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
           {/* Content */}
-          <div className="space-y-6 lg:space-y-8 text-center lg:text-left">
+          <motion.div
+            className="space-y-6 lg:space-y-8 text-center lg:text-left"
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.35 }}
+          >
             <div className="space-y-4">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight tracking-tight text-balance">
                 Your Gateway to
                 <span className="block text-teal-200">International Education</span>
               </h1>
@@ -46,27 +53,31 @@ export function HeroSection({ onNavigateToPage }: HeroSectionProps) {
             {/* CTA Buttons */}
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button 
                 size="lg" 
-                className="bg-white text-primary hover:bg-gray-100 shadow-lg text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto"
+                className="bg-card text-primary hover:bg-accent shadow-lg text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto"
                 onClick={() => onNavigateToPage('univarsity-finder')}
               >
                 Explore Universities
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary shadow-lg text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto"
+                className="border-2 border-primary-foreground text-primary-foreground bg-transparent hover:bg-primary-foreground hover:text-primary shadow-lg text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto"
                 onClick={() => onNavigateToPage('community')}
               >
                 Join Community
               </Button>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
           
           {/* Image */}
-          <div className="relative order-first lg:order-last">
+          <motion.div className="relative order-first lg:order-last" initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.35 }}>
             <div className="relative">
               <ImageWithFallback
                 src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHVkZW50cyUyMHN0dWR5aW5nfGVufDF8fHx8MTc1NTc3NzkyMnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
@@ -88,7 +99,7 @@ export function HeroSection({ onNavigateToPage }: HeroSectionProps) {
                 <div className="text-xs sm:text-sm text-gray-600">Countries</div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

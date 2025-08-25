@@ -371,7 +371,7 @@ export function ResourcesPage({ onNavigateHome }: ResourcesPageProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Page Header */}
       <div className="bg-gradient-to-r from-primary to-teal-600 text-white py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -411,11 +411,11 @@ export function ResourcesPage({ onNavigateHome }: ResourcesPageProps) {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-gray-100">
+                <Button size="lg" variant="secondary" className="bg-card text-primary hover:bg-accent">
                   <Search className="w-4 sm:w-5 h-4 sm:h-5 mr-2" />
                   Browse Resources
                 </Button>
-                <Button size="lg" className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary">
+                <Button size="lg" className="border-2 border-primary-foreground text-primary-foreground bg-transparent hover:bg-primary-foreground hover:text-primary">
                   <Download className="w-4 sm:w-5 h-4 sm:h-5 mr-2" />
                   Download App
                 </Button>

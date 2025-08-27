@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Header } from "./components/Header";
 import { HeroSection } from "./components/HeroSection";
 import { FeaturesSection } from "./components/FeaturesSection";
@@ -33,6 +33,8 @@ function AppContent() {
   useEffect(() => {
     async function testDatabase() {
       try {
+        const isDev = (import.meta as any).env?.DEV;
+        const devLog = (...args: any[]) => { if (isDev) console.log(...args); };
         // First, check if environment variables are loaded
         const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL;
         const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
@@ -45,9 +47,9 @@ function AppContent() {
           return;
         }
         
-        console.log('✅ Environment variables found');
-        console.log('URL:', supabaseUrl);
-        console.log('Key:', supabaseKey.substring(0, 20) + '...');
+        devLog('✅ Environment variables found');
+        devLog('URL:', supabaseUrl);
+        devLog('Key:', supabaseKey.substring(0, 20) + '...');
         
         // Test core tables
         const tablesToTest = [
@@ -59,7 +61,7 @@ function AppContent() {
           'countries'
         ];
         
-        console.log('🔍 Testing database schema...');
+        devLog('🔍 Testing database schema...');
         
         for (const tableName of tablesToTest) {
           try {
@@ -71,7 +73,7 @@ function AppContent() {
             if (error) {
               console.error(`❌ ${tableName} table error:`, error.message);
             } else {
-              console.log(`✅ ${tableName} table accessible`);
+              devLog(`✅ ${tableName} table accessible`);
             }
           } catch (err) {
             console.error(`❌ ${tableName} table failed:`, err);
@@ -86,7 +88,7 @@ function AppContent() {
         if (statusError) {
           console.error('❌ Application statuses error:', statusError);
         } else {
-          console.log(`✅ Application statuses loaded: ${statuses?.length || 0} statuses`);
+          devLog(`✅ Application statuses loaded: ${statuses?.length || 0} statuses`);
         }
         
         // Test countries (should have default data)
@@ -97,11 +99,11 @@ function AppContent() {
         if (countryError) {
           console.error('❌ Countries error:', countryError);
         } else {
-          console.log(`✅ Countries loaded: ${countries?.length || 0} countries`);
+          devLog(`✅ Countries loaded: ${countries?.length || 0} countries`);
         }
         
-        console.log('🎉 Database schema test completed!');
-        console.log('📝 Next: Follow DATABASE_IMPLEMENTATION_GUIDE.md to add sample data');
+        devLog('🎉 Database schema test completed!');
+        devLog('📝 Next: Follow DATABASE_IMPLEMENTATION_GUIDE.md to add sample data');
         
       } catch (err) {
         console.error('❌ Database test failed:', err);

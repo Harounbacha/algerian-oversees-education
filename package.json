@@ -32,22 +32,15 @@
             "@supabase/supabase-js": "^2.56.0",
             "class-variance-authority": "^0.7.1",
             "clsx": "*",
-            "cmdk": "^1.1.1",
-            "embla-carousel-react": "^8.6.0",
+            "dotenv": "^17.2.1",
             "framer-motion": "^11.18.2",
-            "input-otp": "^1.4.2",
             "lucide-react": "^0.487.0",
-            "next-themes": "^0.4.6",
             "react": "^18.3.1",
             "react-day-picker": "^8.10.1",
             "react-dom": "^18.3.1",
             "react-hook-form": "^7.55.0",
-            "react-resizable-panels": "^2.1.7",
             "react-router-dom": "^7.8.1",
-            "recharts": "^2.15.2",
-            "sonner": "^2.0.3",
-            "tailwind-merge": "*",
-            "vaul": "^1.1.2"
+            "tailwind-merge": "*"
       },
       "devDependencies": {
             "@types/node": "^20.10.0",
@@ -57,6 +50,8 @@
       },
       "scripts": {
             "dev": "vite",
-            "build": "vite build"
+            "build": "vite build",
+            "db:apply-extensions": "supabase db push --yes",
+            "seed:universities": "node scripts/seed_universities.js"
       }
 }

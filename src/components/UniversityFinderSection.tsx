@@ -16,63 +16,45 @@ export function UniversityFinderSection({ onNavigateToPage }: UniversityFinderSe
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedField, setSelectedField] = useState('');
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const [universities, setUniversities] = useState<any[]>([]);
+  const [activeFilters, setActiveFilters] = useState([] as string[]);
+  const [universities, setUniversities] = useState([] as any[]);
   const [loading, setLoading] = useState(true);
 
-  // Sample universities data (in real app, this would come from Supabase)
-  const sampleUniversities = [
-    {
-      id: 1,
-      name: "University of Toronto",
-      location: "Toronto, Canada",
-      country: "Canada",
-      image: "https://images.unsplash.com/photo-1600239401291-385542139183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjB1bml2ZXJzaXR5JTIwYnVpbGRpbmdzJTIwYXJjaGl0ZWN0dXJlfGVufDF8fHx8MTc1NTc3NzkzMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      rating: 4.8,
-      programs: ["Engineering", "Medicine", "Business"],
-      tuition: "$45,000/year",
-      deadline: "Jan 15, 2024",
-      algerianStudents: 120,
-      scholarships: true,
-      lowTuition: false,
-      openApplications: true
-    },
-    {
-      id: 2,
-      name: "Sorbonne University",
-      location: "Paris, France",
-      country: "France",
-      image: "https://images.unsplash.com/photo-1600239401291-385542139183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjB1bml2ZXJzaXR5JTIwYnVpbGRpbmdzJTIwYXJjaGl0ZWN0dXJlfGVufDF8fHx8MTc1NTc3NzkzMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      rating: 4.7,
-      programs: ["Literature", "Philosophy", "Sciences"],
-      tuition: "€2,770/year",
-      deadline: "Mar 1, 2024",
-      algerianStudents: 85,
-      scholarships: true,
-      lowTuition: true,
-      openApplications: true
-    },
-    {
-      id: 3,
-      name: "Technical University of Munich",
-      location: "Munich, Germany",
-      country: "Germany",
-      image: "https://images.unsplash.com/photo-1600239401291-385542139183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjB1bml2ZXJzaXR5JTIwYnVpbGRpbmdzJTIwYXJjaGl0ZWN0dXJlfGVufDF8fHx8MTc1NTc3NzkzMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      rating: 4.9,
-      programs: ["Engineering", "Computer Science", "Physics"],
-      tuition: "Free (EU residents)",
-      deadline: "Feb 28, 2024",
-      algerianStudents: 65,
-      scholarships: true,
-      lowTuition: true,
-      openApplications: true
-    }
-  ];
-
   useEffect(() => {
-    // In a real app, fetch universities from Supabase
-    setUniversities(sampleUniversities);
-    setLoading(false);
+    async function load() {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('universities')
+          .select('*')
+          .order('world_ranking', { ascending: true })
+          .limit(12);
+        if (error) throw error;
+        let mapped = (data || []).map(u => ({
+          id: u.id,
+          name: u.name,
+          location: u.country || '',
+          country: u.country || '',
+          image: '/images/university-placeholder.jpg',
+          rating: u.rating || 0,
+          programs: [],
+          tuition: '',
+          deadline: '',
+          algerianStudents: 0,
+          scholarships: false,
+          lowTuition: false,
+          openApplications: true,
+          website: u.website || undefined,
+        }));
+        // If Supabase has no rows, show empty state without calling external APIs
+        setUniversities(mapped);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, []);
 
   const toggleFilter = (filter: string) => {
@@ -136,7 +118,7 @@ export function UniversityFinderSection({ onNavigateToPage }: UniversityFinderSe
 
   if (loading) {
     return (
-      <section id="universities" className="py-20 bg-white">
+      <section id="universities" className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
@@ -148,7 +130,7 @@ export function UniversityFinderSection({ onNavigateToPage }: UniversityFinderSe
   }
 
   return (
-    <section id="universities" className="py-20 bg-white">
+    <section id="universities" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">

@@ -166,7 +166,7 @@ export function ApplicationGuidancePage({ onNavigateHome }: ApplicationGuidanceP
   const progressPercentage = (completedSteps.length / applicationSteps.length) * 100;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       {/* Page Header */}
       <div className="bg-gradient-to-r from-primary to-teal-600 text-white py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -222,9 +222,9 @@ export function ApplicationGuidancePage({ onNavigateHome }: ApplicationGuidanceP
       <div className="py-12 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Progress Tracker */}
-          <div className="bg-muted rounded-2xl p-4 sm:p-6 lg:p-8 mb-8 sm:mb-12">
+                     <div className="rounded-2xl p-4 sm:p-6 lg:p-8 mb-8 sm:mb-12">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-4">
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Your Application Progress</h3>
+                             <h3 className="text-xl sm:text-2xl font-bold text-foreground">Your Application Progress</h3>
               <Badge variant="secondary" className="text-base sm:text-lg px-3 sm:px-4 py-2 self-start sm:self-auto">
                 {completedSteps.length}/{applicationSteps.length} Steps
               </Badge>
@@ -247,8 +247,8 @@ export function ApplicationGuidancePage({ onNavigateHome }: ApplicationGuidanceP
                     <div className="flex items-center space-x-2">
                       <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center ${
                         completedSteps.includes(step.id)
-                          ? 'bg-primary text-white'
-                          : 'bg-gray-200 text-gray-600'
+                                                 ? 'bg-primary text-white'
+                       : 'bg-muted text-muted-foreground'
                       }`}>
                         {completedSteps.includes(step.id) ? (
                           <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -261,7 +261,7 @@ export function ApplicationGuidancePage({ onNavigateHome }: ApplicationGuidanceP
                     <CardDescription className="text-sm">{step.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="p-4 pt-0">
-                    <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
+                                         <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground">
                       <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                       <span>{step.duration}</span>
                     </div>
@@ -296,7 +296,7 @@ export function ApplicationGuidancePage({ onNavigateHome }: ApplicationGuidanceP
                   </CardHeader>
                   <CardContent className="p-4 sm:p-6 pt-0">
                     <div className="space-y-4">
-                      <div className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
+                                             <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-4">
                         <Clock className="w-4 h-4" />
                         <span>Estimated time: {step.duration}</span>
                       </div>
@@ -305,7 +305,7 @@ export function ApplicationGuidancePage({ onNavigateHome }: ApplicationGuidanceP
                         {step.tasks.map((task, taskIndex) => (
                           <div key={taskIndex} className="flex items-start space-x-3">
                             <Checkbox className="mt-0.5 flex-shrink-0" />
-                            <span className="text-sm sm:text-base text-gray-700">{task}</span>
+                            <span className="text-sm sm:text-base text-foreground">{task}</span>
                           </div>
                         ))}
                       </div>
@@ -348,7 +348,7 @@ export function ApplicationGuidancePage({ onNavigateHome }: ApplicationGuidanceP
                     ].map((doc, index) => (
                       <div key={index} className="flex items-start space-x-3">
                         <CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                        <span className="text-sm sm:text-base text-gray-700">{doc}</span>
+                                                 <span className="text-sm sm:text-base text-foreground">{doc}</span>
                       </div>
                     ))}
                   </CardContent>
@@ -363,19 +363,19 @@ export function ApplicationGuidancePage({ onNavigateHome }: ApplicationGuidanceP
                   </CardHeader>
                   <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
                     <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
-                      <p className="text-sm text-gray-700">
-                        <strong>Translation:</strong> All documents in Arabic or French must be officially translated to English.
-                      </p>
+                                             <p className="text-sm text-foreground">
+                         <strong>Translation:</strong> All documents in Arabic or French must be officially translated to English.
+                       </p>
                     </div>
                     <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                      <p className="text-sm text-gray-700">
-                        <strong>Certification:</strong> Academic documents may need to be verified by the Algerian Ministry of Education.
-                      </p>
+                                             <p className="text-sm text-foreground">
+                         <strong>Certification:</strong> Academic documents may need to be verified by the Algerian Ministry of Education.
+                       </p>
                     </div>
                     <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
-                      <p className="text-sm text-gray-700">
-                        <strong>Deadlines:</strong> Start document preparation at least 3 months before application deadlines.
-                      </p>
+                                             <p className="text-sm text-foreground">
+                         <strong>Deadlines:</strong> Start document preparation at least 3 months before application deadlines.
+                       </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -397,7 +397,7 @@ export function ApplicationGuidancePage({ onNavigateHome }: ApplicationGuidanceP
                       {essay.tips.map((tip, tipIndex) => (
                         <div key={tipIndex} className="flex items-start space-x-2">
                           <Star className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">{tip}</span>
+                          <span className="text-sm text-foreground">{tip}</span>
                         </div>
                       ))}
                     </CardContent>
@@ -418,9 +418,9 @@ export function ApplicationGuidancePage({ onNavigateHome }: ApplicationGuidanceP
                 <CardContent className="p-4 sm:p-6 pt-0">
                   <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0 lg:space-x-4">
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-700">✓ Professional feedback and suggestions</p>
-                      <p className="text-sm text-gray-700">✓ Grammar and structure improvements</p>
-                      <p className="text-sm text-gray-700">✓ 48-hour turnaround time</p>
+                      <p className="text-sm text-foreground">✓ Professional feedback and suggestions</p>
+                      <p className="text-sm text-foreground">✓ Grammar and structure improvements</p>
+                      <p className="text-sm text-foreground">✓ 48-hour turnaround time</p>
                     </div>
                     <Button className="bg-accent hover:bg-accent/90 w-full lg:w-auto">
                       Submit Essay for Review
@@ -443,15 +443,15 @@ export function ApplicationGuidancePage({ onNavigateHome }: ApplicationGuidanceP
                     <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Amount:</span>
+                          <span className="text-sm text-muted-foreground">Amount:</span>
                           <span className="font-medium text-primary text-sm sm:text-base">{scholarship.amount}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Deadline:</span>
+                          <span className="text-sm text-muted-foreground">Deadline:</span>
                           <span className="font-medium text-accent text-sm sm:text-base">{scholarship.deadline}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Eligibility:</span>
+                          <span className="text-sm text-muted-foreground">Eligibility:</span>
                           <span className="text-sm text-right">{scholarship.eligibility}</span>
                         </div>
                       </div>
@@ -474,8 +474,8 @@ export function ApplicationGuidancePage({ onNavigateHome }: ApplicationGuidanceP
                 <CardContent className="p-4 sm:p-6 pt-0">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <h4 className="font-medium text-gray-900">Before Applying:</h4>
-                      <ul className="space-y-2 text-sm text-gray-700">
+                      <h4 className="font-medium text-foreground">Before Applying:</h4>
+                      <ul className="space-y-2 text-sm text-foreground">
                         <li>• Research eligibility criteria thoroughly</li>
                         <li>• Prepare all required documents early</li>
                         <li>• Understand the application process</li>
@@ -483,8 +483,8 @@ export function ApplicationGuidancePage({ onNavigateHome }: ApplicationGuidanceP
                       </ul>
                     </div>
                     <div className="space-y-3">
-                      <h4 className="font-medium text-gray-900">Application Strategy:</h4>
-                      <ul className="space-y-2 text-sm text-gray-700">
+                      <h4 className="font-medium text-foreground">Application Strategy:</h4>
+                      <ul className="space-y-2 text-sm text-foreground">
                         <li>• Apply to multiple scholarships</li>
                         <li>• Tailor essays to each scholarship</li>
                         <li>• Highlight unique experiences</li>
@@ -526,7 +526,7 @@ export function ApplicationGuidancePage({ onNavigateHome }: ApplicationGuidanceP
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                  <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-gray-100">
+                                     <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-muted">
                     Book a Consultation
                   </Button>
                   <Button size="lg" variant="outline" className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary">

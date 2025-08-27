@@ -16,24 +16,12 @@ export interface User {
 export interface University {
   id: number;
   name: string;
-  location: string;
-  country: string;
-  city: string;
-  image: string;
-  rating: number;
-  programs: string[];
-  tuition: number;
-  tuition_currency: string;
-  deadline: string;
-  algerian_students: number;
-  scholarships: boolean;
-  low_tuition: boolean;
-  open_applications: boolean;
-  world_ranking: number;
-  description?: string;
+  country?: string;
   website?: string;
-  admission_requirements?: string[];
-  language_requirements?: string[];
+  domain?: string;
+  world_ranking?: number;
+  rating?: number;
+  description?: string;
 }
 
 export interface Application {

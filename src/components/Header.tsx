@@ -218,11 +218,11 @@ export function Header({ currentPage, onNavigateToPage }: HeaderProps) {
                 >
                   {state.theme.name === 'dark' ? (
                     <>
-                      <Sun className="w-4 h-4 mr-2" /> Light mode
+                      <Sun className="w-4 h-4 mr-2" /> Dark mode
                     </>
                   ) : (
                     <>
-                      <Moon className="w-4 h-4 mr-2" /> Dark mode
+                      <Moon className="w-4 h-4 mr-2" /> Light mode
                     </>
                   )}
                 </Button>

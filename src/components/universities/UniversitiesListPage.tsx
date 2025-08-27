@@ -14,10 +14,10 @@ interface UniversitiesListPageProps {
 }
 
 export function UniversitiesListPage({ onNavigateToPage, onNavigateHome }: UniversitiesListPageProps) {
-  const [universities, setUniversities] = useState<any[]>([]);
-  const [filteredUniversities, setFilteredUniversities] = useState<any[]>([]);
+  const [universities, setUniversities] = useState([] as any[]);
+  const [filteredUniversities, setFilteredUniversities] = useState([] as any[]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState('grid' as 'grid' | 'list');
   const [showFilters, setShowFilters] = useState(false);
   
   // Search and filter states
@@ -26,102 +26,46 @@ export function UniversitiesListPage({ onNavigateToPage, onNavigateHome }: Unive
   const [selectedField, setSelectedField] = useState('');
   const [selectedTuitionRange, setSelectedTuitionRange] = useState('');
   const [selectedRating, setSelectedRating] = useState('');
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
-
-  // Sample universities data (in real app, this would come from Supabase)
-  const sampleUniversities = [
-    {
-      id: 1,
-      name: "University of Toronto",
-      location: "Toronto, Canada",
-      country: "Canada",
-      image: "https://images.unsplash.com/photo-1600239401291-385542139183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjB1bml2ZXJzaXR5JTIwYnVpbGRpbmdzJTIwYXJjaGl0ZWN0dXJlfGVufDF8fHx8MTc1NTc3NzkzMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      rating: 4.8,
-      programs: ["Engineering", "Medicine", "Business", "Computer Science"],
-      tuition: 45000,
-      tuitionCurrency: "CAD",
-      deadline: "Jan 15, 2024",
-      algerianStudents: 120,
-      scholarships: true,
-      lowTuition: false,
-      openApplications: true,
-      worldRanking: 18
-    },
-    {
-      id: 2,
-      name: "Sorbonne University",
-      location: "Paris, France",
-      country: "France",
-      image: "https://images.unsplash.com/photo-1600239401291-385542139183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjB1bml2ZXJzaXR5JTIwYnVpbGRpbmdzJTIwYXJjaGl0ZWN0dXJlfGVufDF8fHx8MTc1NTc3NzkzMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      rating: 4.7,
-      programs: ["Literature", "Philosophy", "Sciences", "Arts"],
-      tuition: 2770,
-      tuitionCurrency: "EUR",
-      deadline: "Mar 1, 2024",
-      algerianStudents: 85,
-      scholarships: true,
-      lowTuition: true,
-      openApplications: true,
-      worldRanking: 45
-    },
-    {
-      id: 3,
-      name: "Technical University of Munich",
-      location: "Munich, Germany",
-      country: "Germany",
-      image: "https://images.unsplash.com/photo-1600239401291-385542139183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjB1bml2ZXJzaXR5JTIwYnVpbGRpbmdzJTIwYXJjaGl0ZWN0dXJlfGVufDF8fHx8MTc1NTc3NzkzMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      rating: 4.9,
-      programs: ["Engineering", "Computer Science", "Physics", "Mathematics"],
-      tuition: 0,
-      tuitionCurrency: "EUR",
-      deadline: "Feb 28, 2024",
-      algerianStudents: 65,
-      scholarships: true,
-      lowTuition: true,
-      openApplications: true,
-      worldRanking: 32
-    },
-    {
-      id: 4,
-      name: "University of Oxford",
-      location: "Oxford, United Kingdom",
-      country: "United Kingdom",
-      image: "https://images.unsplash.com/photo-1600239401291-385542139183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjB1bml2ZXJzaXR5JTIwYnVpbGRpbmdzJTIwYXJjaGl0ZWN0dXJlfGVufDF8fHx8MTc1NTc3NzkzMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      rating: 4.9,
-      programs: ["Humanities", "Sciences", "Medicine", "Law"],
-      tuition: 39000,
-      tuitionCurrency: "GBP",
-      deadline: "Oct 15, 2023",
-      algerianStudents: 45,
-      scholarships: true,
-      lowTuition: false,
-      openApplications: false,
-      worldRanking: 1
-    },
-    {
-      id: 5,
-      name: "MIT",
-      location: "Cambridge, United States",
-      country: "United States",
-      image: "https://images.unsplash.com/photo-1600239401291-385542139183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjB1bml2ZXJzaXR5JTIwYnVpbGRpbmdzJTIwYXJjaGl0ZWN0dXJlfGVufDF8fHx8MTc1NTc3NzkzMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      rating: 4.9,
-      programs: ["Engineering", "Computer Science", "Physics", "Mathematics"],
-      tuition: 55000,
-      tuitionCurrency: "USD",
-      deadline: "Jan 1, 2024",
-      algerianStudents: 25,
-      scholarships: true,
-      lowTuition: false,
-      openApplications: false,
-      worldRanking: 2
-    }
-  ];
+  const [activeFilters, setActiveFilters] = useState([] as string[]);
 
   useEffect(() => {
-    // In a real app, fetch universities from Supabase
-    setUniversities(sampleUniversities);
-    setFilteredUniversities(sampleUniversities);
-    setLoading(false);
+    async function load() {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('universities')
+          .select('*')
+          .order('world_ranking', { ascending: true })
+          .limit(60);
+        if (error) throw error;
+        let mapped = (data || []).map(u => ({
+          id: u.id,
+          name: u.name,
+          location: u.country || '',
+          country: u.country || '',
+          image: '/images/university-placeholder.jpg',
+          rating: u.rating || 0,
+          programs: [],
+          tuition: 0,
+          tuitionCurrency: 'USD',
+          deadline: '',
+          algerianStudents: 0,
+          scholarships: false,
+          lowTuition: false,
+          openApplications: true,
+          worldRanking: u.world_ranking || 0,
+          website: u.website || undefined,
+        }));
+        // If Supabase has no rows, show empty state without calling external APIs
+        setUniversities(mapped);
+        setFilteredUniversities(mapped);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, []);
 
   useEffect(() => {
@@ -229,9 +173,9 @@ export function UniversitiesListPage({ onNavigateToPage, onNavigateHome }: Unive
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-card border-b border-border">
+      <div className="border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -274,7 +218,7 @@ export function UniversitiesListPage({ onNavigateToPage, onNavigateHome }: Unive
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Filters Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-card rounded-lg shadow-sm border border-border p-6 sticky top-8">
+            <div className="rounded-lg shadow-sm border border-border p-6 sticky top-8">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-foreground">Filters</h3>
                 <Button
@@ -373,7 +317,7 @@ export function UniversitiesListPage({ onNavigateToPage, onNavigateHome }: Unive
 
                 {/* Quick Filters */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Quick Filters</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Quick Filters</label>
                   <div className="space-y-2">
                     <Button
                       variant={activeFilters.includes('scholarships') ? 'default' : 'outline'}
@@ -427,8 +371,8 @@ export function UniversitiesListPage({ onNavigateToPage, onNavigateHome }: Unive
 
           {/* Results */}
           <div className="lg:col-span-3">
-            {/* Results Header */}
-            <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-6">
+                         {/* Results Header */}
+             <div className="rounded-lg shadow-sm border border-border p-6 mb-6">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-foreground">
@@ -445,8 +389,8 @@ export function UniversitiesListPage({ onNavigateToPage, onNavigateHome }: Unive
             </div>
 
             {/* Universities Grid/List */}
-            {filteredUniversities.length === 0 ? (
-              <div className="bg-card rounded-lg shadow-sm border border-border p-12 text-center">
+                         {filteredUniversities.length === 0 ? (
+               <div className="rounded-lg shadow-sm border border-border p-12 text-center">
                 <div className="text-muted-foreground text-6xl mb-4">🔍</div>
                 <h3 className="text-xl font-semibold text-foreground mb-2">No universities found</h3>
                 <p className="text-muted-foreground mb-6">Try adjusting your search criteria or filters</p>
@@ -469,7 +413,7 @@ export function UniversitiesListPage({ onNavigateToPage, onNavigateHome }: Unive
                           Scholarships Available
                         </Badge>
                       )}
-                      <div className="absolute top-3 right-3 flex items-center space-x-1 bg-card/90 backdrop-blur-sm rounded-full px-2 py-1">
+                      <div className="absolute top-3 right-3 flex items-center space-x-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
                         <Star className="w-4 h-4 text-yellow-500 fill-current" />
                         <span className="text-sm font-medium">{university.rating}</span>
                       </div>

@@ -11,7 +11,6 @@ import {
   Phone,
   MapPin,
 } from "lucide-react";
-import { ApplicationGuidancePage } from "./ApplicationGuidancePage";
 
 type FooterProps = {
   onNavigateToPage: (page: string) => void;
@@ -20,7 +19,6 @@ type FooterProps = {
 export function Footer({ onNavigateToPage }: FooterProps) {
   // Add this function to handle navigation
   const handleNavigation = (page: string) => {
-    console.log('Navigating to:', page); // Add this for debugging
     onNavigateToPage(page);
   };
 
@@ -34,7 +32,7 @@ export function Footer({ onNavigateToPage }: FooterProps) {
               <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
                 <GraduationCap className="w-5 h-5 text-accent-foreground" />
               </div>
-              <span className="text-xl font-semibold">
+              <span className="text-xl font-semibold text-foreground">
                 Algerian Overseas Education
               </span>
             </div>
@@ -67,7 +65,7 @@ export function Footer({ onNavigateToPage }: FooterProps) {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-lg">Platform</h4>
+            <h4 className="font-semibold text-lg text-foreground">Platform</h4>
             <div className="space-y-2">
               <button onClick={() => handleNavigation('univarsity-finder')} className="block text-muted-foreground hover:text-foreground text-sm transition-colors">
                 University Finder
@@ -89,7 +87,7 @@ export function Footer({ onNavigateToPage }: FooterProps) {
 
           {/* Support */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-lg">Support</h4>
+            <h4 className="font-semibold text-lg text-foreground">Support</h4>
             <div className="space-y-2">
               <a href="#" className="block text-muted-foreground hover:text-foreground text-sm transition-colors">
                 Help Center
@@ -111,7 +109,7 @@ export function Footer({ onNavigateToPage }: FooterProps) {
 
           {/* Contact & Newsletter */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-lg">Stay Connected</h4>
+            <h4 className="font-semibold text-lg text-foreground">Stay Connected</h4>
             <div className="space-y-3">
               <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                 <Mail className="w-4 h-4" />
@@ -128,11 +126,11 @@ export function Footer({ onNavigateToPage }: FooterProps) {
             </div>
             
             <div className="space-y-2">
-              <p className="text-sm text-gray-300">Subscribe to our newsletter</p>
+              <p className="text-sm text-muted-foreground">Subscribe to our newsletter</p>
               <div className="flex space-x-2">
                 <Input
                   placeholder="Your email"
-                  className="bg-white/10 border-white/20 text-white placeholder-gray-400 focus:border-accent"
+                  className="text-foreground placeholder:text-muted-foreground"
                 />
                 <Button size="sm" className="bg-accent hover:bg-accent/90 px-3">
                   <Mail className="w-4 h-4" />

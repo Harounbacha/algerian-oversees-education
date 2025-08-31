@@ -6,11 +6,21 @@ export interface User {
   email: string;
   full_name: string;
   avatar_url?: string;
-  education_level: string;
-  field_of_study: string;
-  location: string;
+  bio?: string;
+  location?: string;
+  phone?: string;
+  date_of_birth?: string;
+  nationality?: string;
+  current_education_level?: string;
+  field_of_study?: string;
+  graduation_year?: number;
+  gpa?: number;
+  language_proficiency?: Record<string, any>;
   created_at: string;
   updated_at: string;
+  last_login?: string;
+  is_verified?: boolean;
+  is_active?: boolean;
   preferences?: Preferences;
 }
 

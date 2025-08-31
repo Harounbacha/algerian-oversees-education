@@ -3,8 +3,12 @@
   import react from '@vitejs/plugin-react-swc';
   import path from 'path';
 
-  export default defineConfig({
+  export default defineConfig(({ command, mode }) => ({
     plugins: [react()],
+    define: {
+      __DEV__: command === 'serve',
+      __PROD__: command === 'build',
+    },
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
@@ -45,6 +49,8 @@
     build: {
       target: 'esnext',
       outDir: 'dist',
+      minify: 'terser',
+      sourcemap: mode === 'development',
       rollupOptions: {
         output: {
           manualChunks: {
@@ -84,9 +90,30 @@
           },
         },
       },
+      terserOptions: {
+        compress: {
+          drop_console: mode === 'production',
+          drop_debugger: mode === 'production',
+        },
+      },
     },
     server: {
       port: 3000,
       open: true,
     },
-  });
+    
+    // Environment-specific configuration
+    ...(mode === 'production' && {
+      define: {
+        __DEV__: false,
+        __PROD__: true,
+      },
+    }),
+    
+    ...(mode === 'development' && {
+      define: {
+        __DEV__: true,
+        __PROD__: false,
+      },
+    }),
+  }));

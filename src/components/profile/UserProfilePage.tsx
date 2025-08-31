@@ -67,7 +67,7 @@ export function UserProfilePage({ onNavigateToPage, onNavigateHome }: UserProfil
         email: user.email ?? '',
         phone: user.phone ?? '',
         location: user.location ?? '',
-        educationLevel: user.education_level ?? '',
+        educationLevel: user.current_education_level ?? '',
         fieldOfStudy: user.field_of_study ?? '',
         bio: user.bio ?? '',
         linkedinUrl: user.linkedin_url ?? '',

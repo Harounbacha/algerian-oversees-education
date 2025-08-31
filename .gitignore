@@ -44,3 +44,4 @@ database_schema.sql
 
 # OS specific
 Thumbs.db
+.vercel

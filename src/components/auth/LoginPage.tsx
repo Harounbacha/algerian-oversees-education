@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "../ui/alert";
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, Loader2 } from "lucide-react";
 import { supabase } from '../../supabaseClient';
 import { useApp } from '../../context/AppContext';
+import { ValidationService, validationRules } from '../../lib/validation';
 
 interface LoginPageProps {
   onNavigateToPage: (page: string) => void;
@@ -28,11 +29,22 @@ export function LoginPage({ onNavigateToPage, onNavigateHome }: LoginPageProps) 
     setError('');
     setSuccess('');
 
+    // Validate form data
+    const formData = { email: email.trim(), password };
+    const validation = ValidationService.validateFormData(formData, validationRules.login);
+    
+    if (!validation.isValid) {
+      const errorMessages = Object.values(validation.errors).flat();
+      setError(errorMessages.join('. '));
+      setLoading(false);
+      return;
+    }
+
     try {
       await login(email.trim(), password);
       setSuccess('Login successful! Redirecting...');
       // Remove the manual navigation - let AppContext handle it automatically
-      // The login function in AppContext will set currentPage to 'dashboard'
+      // The login function in AppContext will set currentPage to 'profile'
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Login failed';
       // eslint-disable-next-line no-console

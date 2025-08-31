@@ -37,7 +37,7 @@ const initialState: AppState = {
 
 // Reducer function
 function appReducer(state: AppState, action: AppAction): AppState {
-  console.log('Reducer action:', action.type, action.payload);
+  console.log('Reducer action:', action.type, 'payload' in action ? action.payload : 'no payload');
   switch (action.type) {
     case 'SET_USER':
       console.log('Setting user:', action.payload);
@@ -146,6 +146,34 @@ export const AppProvider = ({ children }: AppProviderProps) => {
             dispatch({ type: 'SET_CURRENT_PAGE', payload: 'profile' });
           } else {
             console.log('No profile found for user:', session.user.id);
+            // Create user profile automatically
+            try {
+              console.log('Creating user profile for:', session.user.id);
+              const { data: newProfile, error: createError } = await supabase
+                .from('users')
+                .insert({
+                  id: session.user.id,
+                  email: session.user.email,
+                  full_name: session.user.email?.split('@')[0] || 'User',
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                })
+                .select()
+                .single();
+
+              if (createError) {
+                console.error('Error creating profile:', createError);
+                return;
+              }
+
+              if (newProfile) {
+                console.log('Profile created successfully:', newProfile);
+                dispatch({ type: 'SET_USER', payload: newProfile });
+                dispatch({ type: 'SET_CURRENT_PAGE', payload: 'profile' });
+              }
+            } catch (profileError) {
+              console.error('Failed to create profile:', profileError);
+            }
           }
         } else {
           dispatch({ type: 'SET_USER', payload: null });
@@ -293,6 +321,46 @@ export const AppProvider = ({ children }: AppProviderProps) => {
           dispatch({ type: 'SET_CURRENT_PAGE', payload: 'profile' });
         } else {
           console.log('Login: no profile found for user:', data.user.id);
+          // Create user profile automatically
+          try {
+            console.log('Creating user profile for:', data.user.id);
+            const { data: newProfile, error: createError } = await supabase
+              .from('users')
+              .insert({
+                id: data.user.id,
+                email: data.user.email,
+                full_name: data.user.email?.split('@')[0] || 'User',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              .select()
+              .single();
+
+            if (createError) {
+              console.error('Error creating profile:', createError);
+              throw new Error('Failed to create user profile');
+            }
+
+            if (newProfile) {
+              console.log('Profile created successfully:', newProfile);
+              dispatch({ type: 'SET_USER', payload: newProfile });
+              addNotification({
+                type: 'success',
+                title: 'Welcome!',
+                message: 'Your profile has been created successfully!',
+                duration: 3000,
+              });
+              dispatch({ type: 'SET_CURRENT_PAGE', payload: 'profile' });
+            }
+          } catch (profileError) {
+            console.error('Failed to create profile:', profileError);
+            addNotification({
+              type: 'error',
+              title: 'Profile Creation Failed',
+              message: 'Login successful but profile creation failed. Please contact support.',
+              duration: 5000,
+            });
+          }
         }
       }
     } catch (error) {

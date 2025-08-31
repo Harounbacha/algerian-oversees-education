@@ -3,31 +3,34 @@ import { Header } from "./components/Header";
 import { HeroSection } from "./components/HeroSection";
 import { FeaturesSection } from "./components/FeaturesSection";
 import { UniversityFinderSection } from "./components/UniversityFinderSection";
-import { Suspense, lazy } from "react";
+import { lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-const ApplicationGuidancePage = lazy(() => import("./components/ApplicationGuidancePage").then(m => ({ default: m.ApplicationGuidancePage })));
-const CommunityPage = lazy(() => import("./components/CommunityPage").then(m => ({ default: m.CommunityPage })));
-const CareerSupportPage = lazy(() => import("./components/CareerSupportPage").then(m => ({ default: m.CareerSupportPage })));
-const ResourcesPage = lazy(() => import("./components/ResourcesPage").then(m => ({ default: m.ResourcesPage })));
 import { Footer } from "./components/Footer";
-const Dashboard = lazy(() => import("./components/Dashboard"));
-const LoginPage = lazy(() => import("./components/auth/LoginPage").then(m => ({ default: m.LoginPage })));
-const RegisterPage = lazy(() => import("./components/auth/RegisterPage").then(m => ({ default: m.RegisterPage })));
-const UniversityDetailPage = lazy(() => import("./components/universities/UniversityDetailPage").then(m => ({ default: m.UniversityDetailPage })));
-const UniversitiesListPage = lazy(() => import("./components/universities/UniversitiesListPage").then(m => ({ default: m.UniversitiesListPage })));
-const UserProfilePage = lazy(() => import("./components/profile/UserProfilePage").then(m => ({ default: m.UserProfilePage })));
-const ApplicationPage = lazy(() => import("./components/applications/ApplicationPage").then(m => ({ default: m.ApplicationPage })));
+import Dashboard from "./components/Dashboard";
+import LoginPage from "./components/auth/LoginPage";
+import { RegisterPage } from "./components/auth/RegisterPage";
+import { UniversityDetailPage } from "./components/universities/UniversityDetailPage";
+import { UniversitiesListPage } from "./components/universities/UniversitiesListPage";
+import { UserProfilePage } from "./components/profile/UserProfilePage";
+import { ApplicationPage } from "./components/applications/ApplicationPage";
+import { ApplicationGuidancePage } from "./components/ApplicationGuidancePage";
+import { CommunityPage } from "./components/CommunityPage";
+import { CareerSupportPage } from "./components/CareerSupportPage";
+import { ResourcesPage } from "./components/ResourcesPage";
 import { AppProvider } from "./context/AppContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { NotificationSystem } from "./components/NotificationSystem";
 import { useApp } from "./context/AppContext";
 import { useEffect } from "react";
 import { supabase } from './supabaseClient';
+import { DebugAuth } from "./components/DebugAuth";
 
 // Main App Component
 function AppContent() {
   const { state, setCurrentPage } = useApp();
   const { currentPage } = state;
+  
+  console.log('AppContent: currentPage =', currentPage, 'user =', state.user);
 
   // Test Supabase connection and database schema
   useEffect(() => {
@@ -114,6 +117,7 @@ function AppContent() {
   }, []);
 
   const renderCurrentPage = () => {
+    console.log('Rendering page:', currentPage);
     switch (currentPage) {
       case 'home':
         return (
@@ -168,14 +172,13 @@ function AppContent() {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
           >
-            <Suspense fallback={<div className="p-8">Loading…</div>}>
-              {renderCurrentPage()}
-            </Suspense>
+            {renderCurrentPage()}
           </motion.div>
         </AnimatePresence>
       </main>
       <Footer onNavigateToPage={setCurrentPage} />
       <NotificationSystem />
+      <DebugAuth />
     </div>
   );
 }
@@ -183,8 +186,8 @@ function AppContent() {
 // Root App Component with Providers
 export default function App() {
   return (
-    <ErrorBoundary>
-      <AppProvider children={<AppContent />} />
-    </ErrorBoundary>
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
   );
 }

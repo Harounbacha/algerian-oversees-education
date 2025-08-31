@@ -28,6 +28,7 @@ import {
   Globe
 } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
+import { useApp } from '../../context/AppContext';
 
 interface UserProfilePageProps {
   onNavigateToPage: (page: string) => void;
@@ -35,11 +36,12 @@ interface UserProfilePageProps {
 }
 
 export function UserProfilePage({ onNavigateToPage, onNavigateHome }: UserProfilePageProps) {
-  const [user, setUser] = useState<any>(null);
+  const { state, addNotification, savePreferences, setTheme } = useApp();
+  const user = state.user as any;
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
-  const [applications, setApplications] = useState<any[]>([]);
-  const [favorites, setFavorites] = useState<any[]>([]);
+  const [applications, setApplications] = useState([] as any[]);
+  const [favorites, setFavorites] = useState([] as any[]);
   const [activeTab, setActiveTab] = useState('profile');
 
   // Form states
@@ -57,53 +59,37 @@ export function UserProfilePage({ onNavigateToPage, onNavigateHome }: UserProfil
   });
 
   useEffect(() => {
-    loadUserProfile();
-    loadUserData();
-  }, []);
-
-  const loadUserProfile = async () => {
-    try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      
-      if (currentUser) {
-        // In a real app, fetch user profile from profiles table
-        const mockUser = {
-          id: currentUser.id,
-          fullName: 'Ahmed Benali',
-          email: currentUser.email,
-          phone: '+213 123 456 789',
-          location: 'Algiers, Algeria',
-          educationLevel: 'High School',
-          fieldOfStudy: 'Computer Science',
-          bio: 'Passionate student interested in studying abroad. Looking for opportunities in engineering and technology.',
-          linkedinUrl: 'https://linkedin.com/in/ahmed-benali',
-          githubUrl: 'https://github.com/ahmed-benali',
-          portfolioUrl: 'https://ahmed-benali.dev',
-          avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-          createdAt: '2024-01-15',
-          lastActive: '2024-01-20'
-        };
-        
-        setUser(mockUser);
-        setFormData({
-          fullName: mockUser.fullName,
-          email: mockUser.email,
-          phone: mockUser.phone,
-          location: mockUser.location,
-          educationLevel: mockUser.educationLevel,
-          fieldOfStudy: mockUser.fieldOfStudy,
-          bio: mockUser.bio,
-          linkedinUrl: mockUser.linkedinUrl,
-          githubUrl: mockUser.githubUrl,
-          portfolioUrl: mockUser.portfolioUrl
-        });
-      }
-    } catch (error) {
-      console.error('Error loading user profile:', error);
-    } finally {
+    console.log('UserProfilePage: user object:', user);
+    if (user) {
+      // Use the user data from AppContext instead of loading from Supabase again
+      setFormData({
+        fullName: user.full_name ?? '',
+        email: user.email ?? '',
+        phone: user.phone ?? '',
+        location: user.location ?? '',
+        educationLevel: user.education_level ?? '',
+        fieldOfStudy: user.field_of_study ?? '',
+        bio: user.bio ?? '',
+        linkedinUrl: user.linkedin_url ?? '',
+        githubUrl: user.github_url ?? '',
+        portfolioUrl: user.portfolio_url ?? ''
+      });
+      setLoading(false);
+    } else {
+      // If no user, set loading to false to show the authentication required message
       setLoading(false);
     }
-  };
+    loadUserData();
+    
+    // Fallback: ensure loading state doesn't get stuck
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+    
+    return () => clearTimeout(timeout);
+  }, [user]);
+
+
 
   const loadUserData = async () => {
     // Mock data for applications and favorites
@@ -147,28 +133,53 @@ export function UserProfilePage({ onNavigateToPage, onNavigateHome }: UserProfil
 
   const handleSaveProfile = async () => {
     try {
-      // In a real app, update user profile in Supabase
-      setUser({ ...user, ...formData });
+      if (!user) return;
+      // Update auth email if changed
+      if (formData.email && formData.email !== user.email) {
+        const { error: emailErr } = await supabase.auth.updateUser({ email: formData.email });
+        if (emailErr) throw emailErr;
+      }
+      // Update user profile row
+      const updatePayload: any = {
+        full_name: formData.fullName,
+        email: formData.email,
+        location: formData.location,
+        education_level: formData.educationLevel,
+        field_of_study: formData.fieldOfStudy,
+        phone: formData.phone,
+        bio: formData.bio,
+        linkedin_url: formData.linkedinUrl,
+        github_url: formData.githubUrl,
+        portfolio_url: formData.portfolioUrl,
+        updated_at: new Date().toISOString(),
+      };
+      const { error: profileErr } = await supabase
+        .from('users')
+        .update(updatePayload)
+        .eq('id', user.id);
+      if (profileErr) throw profileErr;
+      // Optionally persist frequently used fields in preferences for fast access
+      await savePreferences({ profileQuick: { fullName: formData.fullName, phone: formData.phone } });
       setEditing(false);
-      // Show success message
+      addNotification({ type: 'success', title: 'Profile updated', message: 'Your changes have been saved.', duration: 3000 });
     } catch (error) {
       console.error('Error updating profile:', error);
-      // Show error message
+      addNotification({ type: 'error', title: 'Update failed', message: error instanceof Error ? error.message : 'Unknown error', duration: 5000 });
     }
   };
 
   const handleCancelEdit = () => {
     setFormData({
-      fullName: user.fullName,
+      fullName: user.full_name,
       email: user.email,
       phone: user.phone,
       location: user.location,
-      educationLevel: user.educationLevel,
-      fieldOfStudy: user.fieldOfStudy,
-      bio: user.bio,
-      linkedinUrl: user.linkedinUrl,
-      githubUrl: user.githubUrl,
-      portfolioUrl: user.portfolioUrl
+              educationLevel: user.education_level,
+        fieldOfStudy: user.field_of_study,
+        bio: user.bio,
+        linkedinUrl: user.linkedin_url,
+        githubUrl: user.github_url,
+        portfolioUrl: user.portfolio_url
     });
     setEditing(false);
   };
@@ -188,6 +199,26 @@ export function UserProfilePage({ onNavigateToPage, onNavigateHome }: UserProfil
     }
   };
 
+  // Check if user is authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <div className="text-red-600 mb-4">Authentication required</div>
+            <p className="text-gray-600">Please log in to view your profile.</p>
+            <Button 
+              onClick={() => onNavigateToPage('login')}
+              className="mt-4"
+            >
+              Go to Login
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -202,9 +233,9 @@ export function UserProfilePage({ onNavigateToPage, onNavigateHome }: UserProfil
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-card border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -212,14 +243,14 @@ export function UserProfilePage({ onNavigateToPage, onNavigateHome }: UserProfil
                 variant="ghost"
                 size="sm"
                 onClick={onNavigateHome}
-                className="text-gray-600 hover:text-gray-900"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Home
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
-                <p className="text-gray-600">Manage your account and applications</p>
+                <h1 className="text-2xl font-bold text-foreground">My Profile</h1>
+                <p className="text-muted-foreground">Manage your account and applications</p>
               </div>
             </div>
             
@@ -253,8 +284,8 @@ export function UserProfilePage({ onNavigateToPage, onNavigateHome }: UserProfil
               <CardHeader className="text-center">
                 <div className="relative mx-auto mb-4">
                   <Avatar className="w-24 h-24 mx-auto">
-                    <AvatarImage src={user.avatarUrl} alt={user.fullName} />
-                    <AvatarFallback>{user.fullName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    <AvatarImage src={user.avatar_url} alt={user.full_name} />
+                    <AvatarFallback>{user.full_name?.split(' ').map(n => n[0]).join('') || 'U'}</AvatarFallback>
                   </Avatar>
                   {editing && (
                     <Button
@@ -265,8 +296,8 @@ export function UserProfilePage({ onNavigateToPage, onNavigateHome }: UserProfil
                     </Button>
                   )}
                 </div>
-                <CardTitle className="text-xl">{user.fullName}</CardTitle>
-                <p className="text-gray-600">{user.fieldOfStudy}</p>
+                <CardTitle className="text-xl">{user.full_name}</CardTitle>
+                <p className="text-gray-600">{user.field_of_study}</p>
                 <div className="flex items-center justify-center space-x-1 text-sm text-gray-500">
                   <MapPin className="w-4 h-4" />
                   <span>{user.location}</span>

@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import { Alert, AlertDescription } from "../ui/alert";
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, Loader2 } from "lucide-react";
 import { supabase } from '../../supabaseClient';
+import { useApp } from '../../context/AppContext';
 
 interface LoginPageProps {
   onNavigateToPage: (page: string) => void;
@@ -13,6 +14,7 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onNavigateToPage, onNavigateHome }: LoginPageProps) {
+  const { login } = useApp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,29 +22,22 @@ export function LoginPage({ onNavigateToPage, onNavigateHome }: LoginPageProps) 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: any) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     setSuccess('');
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        setError(error.message);
-      } else {
-        setSuccess('Login successful! Redirecting...');
-        // Redirect to dashboard after successful login
-        setTimeout(() => {
-          onNavigateToPage('dashboard');
-        }, 1500);
-      }
+      await login(email.trim(), password);
+      setSuccess('Login successful! Redirecting...');
+      // Remove the manual navigation - let AppContext handle it automatically
+      // The login function in AppContext will set currentPage to 'dashboard'
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      const msg = err instanceof Error ? err.message : 'Login failed';
+      // eslint-disable-next-line no-console
+      console.error('Login failed:', msg);
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -56,7 +51,7 @@ export function LoginPage({ onNavigateToPage, onNavigateHome }: LoginPageProps) 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}`
         }
       });
 
@@ -263,3 +258,5 @@ export function LoginPage({ onNavigateToPage, onNavigateHome }: LoginPageProps) 
     </div>
   );
 }
+
+export default LoginPage

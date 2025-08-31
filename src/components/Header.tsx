@@ -102,13 +102,15 @@ export function Header({ currentPage, onNavigateToPage }: HeaderProps) {
               variant="outline"
               size="sm"
               className="h-9 w-9 p-0"
-              onClick={() =>
+              onClick={() => {
+                const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const isDark = state.theme.name === 'dark' || (state.theme.name === 'system' && prefersDark);
                 setTheme(
-                  state.theme.name === 'dark'
+                  isDark
                     ? { name: 'light', label: 'Light', icon: () => null }
                     : { name: 'dark', label: 'Dark', icon: () => null }
-                )
-              }
+                );
+              }}
               aria-label="Toggle theme"
               title="Toggle theme"
             >
@@ -118,21 +120,33 @@ export function Header({ currentPage, onNavigateToPage }: HeaderProps) {
                 <Moon className="w-4 h-4" />
               )}
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-              onClick={() => onNavigateToPage('login')}
-            >
-              Login
-            </Button>
-            <Button 
-              size="sm" 
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-              onClick={() => onNavigateToPage('register')}
-            >
-              Get Started
-            </Button>
+            {state.isAuthenticated ? (
+              <Button 
+                size="sm" 
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                onClick={() => onNavigateToPage('profile')}
+              >
+                Profile
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  onClick={() => onNavigateToPage('login')}
+                >
+                  Login
+                </Button>
+                <Button 
+                  size="sm" 
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                  onClick={() => onNavigateToPage('register')}
+                >
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -208,13 +222,15 @@ export function Header({ currentPage, onNavigateToPage }: HeaderProps) {
                 <Button
                   variant="outline"
                   className="w-full h-10"
-                  onClick={() =>
+                  onClick={() => {
+                    const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    const isDark = state.theme.name === 'dark' || (state.theme.name === 'system' && prefersDark);
                     setTheme(
-                      state.theme.name === 'dark'
+                      isDark
                         ? { name: 'light', label: 'Light', icon: () => null }
                         : { name: 'dark', label: 'Dark', icon: () => null }
-                    )
-                  }
+                    );
+                  }}
                 >
                   {state.theme.name === 'dark' ? (
                     <>
@@ -226,19 +242,30 @@ export function Header({ currentPage, onNavigateToPage }: HeaderProps) {
                     </>
                   )}
                 </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                  onClick={() => onNavigateToPage('login')}
-                >
-                  Login
-                </Button>
-                <Button 
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                  onClick={() => onNavigateToPage('register')}
-                >
-                  Get Started
-                </Button>
+                {state.isAuthenticated ? (
+                  <Button 
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                    onClick={() => onNavigateToPage('profile')}
+                  >
+                    Profile
+                  </Button>
+                ) : (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                      onClick={() => onNavigateToPage('login')}
+                    >
+                      Login
+                    </Button>
+                    <Button 
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                      onClick={() => onNavigateToPage('register')}
+                    >
+                      Get Started
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>

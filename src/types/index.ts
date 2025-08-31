@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import React from 'react';
 
 // Core Types
 export interface User {
@@ -11,6 +11,7 @@ export interface User {
   location: string;
   created_at: string;
   updated_at: string;
+  preferences?: Preferences;
 }
 
 export interface University {
@@ -175,7 +176,7 @@ export interface PaginatedResponse<T> {
 export interface ViewMode {
   type: 'grid' | 'list';
   label: string;
-  icon: ComponentType<{ className?: string }>;
+  icon: any;
 }
 
 export interface FilterOption {
@@ -188,7 +189,12 @@ export interface FilterOption {
 export interface Theme {
   name: 'light' | 'dark' | 'system';
   label: string;
-  icon: ComponentType<{ className?: string }>;
+  icon: any;
+}
+
+export interface Preferences {
+  theme?: Theme;
+  [key: string]: any;
 }
 
 // Notification Types

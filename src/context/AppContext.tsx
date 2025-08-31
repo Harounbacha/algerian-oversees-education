@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import type { User, Notification, Theme } from '../types';
+import type { User, Notification, Theme, Preferences } from '../types';
 
 // State interface
 interface AppState {
@@ -37,8 +37,10 @@ const initialState: AppState = {
 
 // Reducer function
 function appReducer(state: AppState, action: AppAction): AppState {
+  console.log('Reducer action:', action.type, action.payload);
   switch (action.type) {
     case 'SET_USER':
+      console.log('Setting user:', action.payload);
       return {
         ...state,
         user: action.payload,
@@ -71,6 +73,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         sidebarOpen: action.payload,
       };
     case 'SET_CURRENT_PAGE':
+      console.log('Setting current page:', action.payload);
       return {
         ...state,
         currentPage: action.payload,
@@ -88,7 +91,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
 // Context interface
 interface AppContextType {
   state: AppState;
-  dispatch: React.Dispatch<AppAction>;
+  dispatch: (action: AppAction) => void;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (userData: any) => Promise<void>;
@@ -97,20 +100,65 @@ interface AppContextType {
   setTheme: (theme: Theme) => void;
   setCurrentPage: (page: string) => void;
   toggleSidebar: () => void;
+  savePreferences: (partial: Record<string, any>) => Promise<void>;
 }
 
 // Create context
-const AppContext = createContext<AppContextType | undefined>(undefined);
+const AppContext = createContext(null as unknown as AppContextType);
 
 // Provider component
-type AppProviderProps = { children?: ReactNode };
+type AppProviderProps = { children?: any };
 
-export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+export const AppProvider = ({ children }: AppProviderProps) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   // Initialize app
   useEffect(() => {
     initializeApp();
+  }, []);
+
+  // Keep auth state in sync across reloads/navigation
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session?.user?.id);
+      try {
+        if (session?.user) {
+          console.log('Auth state change: fetching profile for user:', session.user.id);
+          const { data: profile, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (error) {
+            console.error('Error fetching profile:', error);
+          }
+          
+          if (profile) {
+            console.log('Setting user in context:', profile);
+            dispatch({ type: 'SET_USER', payload: profile });
+            const preferences = (profile as any).preferences as Preferences | undefined;
+            if (preferences?.theme) {
+              dispatch({ type: 'SET_THEME', payload: preferences.theme });
+            }
+            // Navigate to profile if coming from login
+            console.log('Setting current page to profile');
+            dispatch({ type: 'SET_CURRENT_PAGE', payload: 'profile' });
+          } else {
+            console.log('No profile found for user:', session.user.id);
+          }
+        } else {
+          dispatch({ type: 'SET_USER', payload: null });
+          dispatch({ type: 'SET_CURRENT_PAGE', payload: 'home' });
+        }
+      } catch (e) {
+        console.error('Auth state sync error', e);
+      }
+    });
+
+    return () => {
+      authListener?.subscription?.unsubscribe?.();
+    };
   }, []);
 
   // Handle theme changes
@@ -141,14 +189,30 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       
       if (session?.user) {
         // Fetch user profile
-        const { data: profile } = await supabase
+        console.log('InitializeApp: fetching profile for user:', session.user.id);
+        const { data: profile, error } = await supabase
           .from('users')
           .select('*')
           .eq('id', session.user.id)
           .single();
 
+        if (error) {
+          console.error('InitializeApp: error fetching profile:', error);
+        }
+
         if (profile) {
+          console.log('InitializeApp: setting user in context:', profile);
           dispatch({ type: 'SET_USER', payload: profile });
+          // Prefer server-stored theme over local if present
+          const preferences = (profile as any).preferences as Preferences | undefined;
+          if (preferences?.theme) {
+            dispatch({ type: 'SET_THEME', payload: preferences.theme });
+          }
+          // Set current page to profile for authenticated users
+          console.log('InitializeApp: setting current page to profile');
+          dispatch({ type: 'SET_CURRENT_PAGE', payload: 'profile' });
+        } else {
+          console.log('InitializeApp: no profile found for user:', session.user.id);
         }
       }
 
@@ -156,7 +220,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme) {
         const theme = JSON.parse(savedTheme);
-        dispatch({ type: 'SET_THEME', payload: theme });
+        // Only apply local theme if server didn't already set one
+        if (!state.user || !(state.user as any).preferences?.theme) {
+          dispatch({ type: 'SET_THEME', payload: theme });
+        }
       }
 
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -184,28 +251,48 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       dispatch({ type: 'SET_LOADING', payload: true });
 
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: (email || '').trim(),
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.error('Supabase signInWithPassword error:', error.message);
+        throw error;
+      }
 
       if (data.user) {
         // Fetch user profile
-        const { data: profile } = await supabase
+        console.log('Login: fetching profile for user:', data.user.id);
+        const { data: profile, error } = await supabase
           .from('users')
           .select('*')
           .eq('id', data.user.id)
           .single();
 
+        if (error) {
+          console.error('Login: error fetching profile:', error);
+        }
+
         if (profile) {
+          console.log('Login: setting user in context:', profile);
           dispatch({ type: 'SET_USER', payload: profile });
+          const preferences = (profile as any).preferences as Preferences | undefined;
+          const serverTheme = preferences?.theme;
+          if (serverTheme) {
+            dispatch({ type: 'SET_THEME', payload: serverTheme });
+          }
           addNotification({
             type: 'success',
             title: 'Welcome back!',
             message: `Hello, ${profile.full_name}!`,
             duration: 3000,
           });
+          // Navigate immediately after successful login
+          console.log('Login successful, setting current page to profile');
+          dispatch({ type: 'SET_CURRENT_PAGE', payload: 'profile' });
+        } else {
+          console.log('Login: no profile found for user:', data.user.id);
         }
       }
     } catch (error) {
@@ -296,8 +383,25 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     dispatch({ type: 'REMOVE_NOTIFICATION', payload: id });
   };
 
+  const savePreferences = async (partial: Record<string, any>) => {
+    if (!state.user) return; // only persist when authenticated
+    try {
+      const current = (state.user as any).preferences ?? {};
+      const next = { ...current, ...partial } as Preferences;
+      await supabase.from('users')
+        .update({ preferences: next })
+        .eq('id', state.user.id);
+      dispatch({ type: 'SET_USER', payload: { ...state.user, preferences: next } as any });
+    } catch (e) {
+      console.error('Failed to save preferences', e);
+    }
+  };
+
   const setTheme = (theme: Theme) => {
     dispatch({ type: 'SET_THEME', payload: theme });
+    if (state.user) {
+      void savePreferences({ theme });
+    }
   };
 
   const setCurrentPage = (page: string) => {
@@ -319,6 +423,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setTheme,
     setCurrentPage,
     toggleSidebar,
+    savePreferences,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -332,4 +437,3 @@ export function useApp() {
   }
   return context;
 }
-

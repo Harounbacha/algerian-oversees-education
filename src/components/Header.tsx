@@ -121,13 +121,23 @@ export function Header({ currentPage, onNavigateToPage }: HeaderProps) {
               )}
             </Button>
             {state.isAuthenticated ? (
-              <Button 
-                size="sm" 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                onClick={() => onNavigateToPage('profile')}
-              >
-                Profile
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Button 
+                  size="sm" 
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                  onClick={() => onNavigateToPage('profile')}
+                >
+                  Profile
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  onClick={() => state.logout?.()}
+                >
+                  Logout
+                </Button>
+              </div>
             ) : (
               <>
                 <Button 
@@ -243,12 +253,21 @@ export function Header({ currentPage, onNavigateToPage }: HeaderProps) {
                   )}
                 </Button>
                 {state.isAuthenticated ? (
-                  <Button 
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                    onClick={() => onNavigateToPage('profile')}
-                  >
-                    Profile
-                  </Button>
+                  <div className="space-y-2">
+                    <Button 
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                      onClick={() => onNavigateToPage('profile')}
+                    >
+                      Profile
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => state.logout?.()}
+                    >
+                      Logout
+                    </Button>
+                  </div>
                 ) : (
                   <>
                     <Button 
